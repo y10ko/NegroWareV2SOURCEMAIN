@@ -1,0 +1,798 @@
+ library = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid/ui-libraries/main/venus/source.lua", true))()
+
+local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/BoredStuff2/notify-lib/main/lib"))()
+NotifyLib.prompt('NiggawareV2', 'Loading..', 5)
+wait(2)
+NotifyLib.prompt('NiggawareV2', 'Loaded. Enjoy!', 5)
+NotifyLib.prompt('NiggawareV2', 'Made by $ yk#1126', 5)
+
+
+
+
+
+local main = library:Load({Name = "Niggaware Hub", Theme = "Dark", SizeX = 440, SizeY = 480, ColorOverrides = {}})
+local aimbot = main:Tab("Main")
+local section = aimbot:Section({Name = "Main Scripts", column = 1})
+
+
+local label = section:Label("Have Fun")
+
+local button = section:Button({Name = "V1", Callback = function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/y10ko/Niggaware/main/Niggaware",true))()
+end})
+
+
+local button = section:Button({Name = "V2", Callback = function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/y10ko/NiggawareV2/main/NiggawareV2",true))()
+end})
+
+
+local button = section:Button({Name = "V3", Callback = function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/y10ko/NiggawareV3/main/NiggawareV3",true))()
+end})
+
+
+local button = section:Button({Name = "Unlimted StreamProof", Callback = function()
+    local Aiming = loadstring(game:HttpGet("https://pastebin.com/raw/3A9wdSkL"))()
+
+Aiming.TeamCheck(false)
+
+
+
+local Workspace = game:GetService("Workspace")
+
+local Players = game:GetService("Players")
+
+local RunService = game:GetService("RunService")
+
+local UserInputService = game:GetService("UserInputService")
+
+
+
+local LocalPlayer = Players.LocalPlayer
+
+local Mouse = LocalPlayer:GetMouse()
+
+local CurrentCamera = Workspace.CurrentCamera
+
+
+
+local DaHoodSettings = {
+
+    SilentAim = true,
+
+    AimLock = false,
+
+    Prediction = 0.1,
+
+    AimLockKeybind = Enum.KeyCode.E,
+
+    Resolver = true,
+
+}
+
+getgenv().DaHoodSettings = DaHoodSettings
+
+
+
+local GunSettings = {
+
+    ["Double-Barrel SG"] = { --// dh
+
+        ["FOV"] = 25
+
+    },
+
+    ["Double Barrel SG"] = { --// dhm
+
+        ["FOV"] = 26.5
+
+    },
+
+    ["DoubleBarrel"] = { --// hood customs
+
+    ["FOV"] = 20
+
+    },
+
+    ["Revolver"] = {
+
+        ["FOV"] = 14.5
+
+    },
+
+    ["SMG"] = {
+
+        ["FOV"] = 6.5
+
+    },
+
+    ["Shotgun"] = {
+
+        ["FOV"] = 25
+
+    }
+
+}
+
+
+
+function Aiming.Check()
+
+    if not (Aiming.Enabled == true and Aiming.Selected ~= LocalPlayer and Aiming.SelectedPart ~= nil) then
+
+        return false
+
+    end
+
+    local Character = Aiming.Character(Aiming.Selected)
+
+    local KOd = Character:WaitForChild("BodyEffects")["K.O"].Value
+
+    local Grabbed = Character:FindFirstChild("GRABBING_CONSTRAINT") ~= nil
+
+    if (KOd or Grabbed) then
+
+        return false
+
+    end
+
+    return true
+
+end
+
+
+
+task.spawn(function()
+
+    while task.wait() do
+
+        if DaHoodSettings.Resolver and Aiming.Selected ~= nil and (Aiming.Selected.Character)  then
+
+            local oldVel = game.Players[Aiming.Selected.Name].Character.HumanoidRootPart.Velocity
+
+            game.Players[Aiming.Selected.Name].Character.HumanoidRootPart.Velocity = Vector3.new(oldVel.X, -0, oldVel.Z)
+
+        end 
+
+    end
+
+end)
+
+
+
+local Script = {Functions = {}}
+
+
+
+Script.Functions.getToolName = function(name)
+
+    local split = string.split(string.split(name, "[")[2], "]")[1]
+
+    return split
+
+end
+
+
+
+Script.Functions.getEquippedWeaponName = function(player)
+
+   if (player.Character) and player.Character:FindFirstChildWhichIsA("Tool") then
+
+      local Tool =  player.Character:FindFirstChildWhichIsA("Tool")
+
+      if string.find(Tool.Name, "%[") and string.find(Tool.Name, "%]") and not string.find(Tool.Name, "Wallet") and not string.find(Tool.Name, "Phone") then 
+
+         return Script.Functions.getToolName(Tool.Name)
+
+      end
+
+   end
+
+   return nil
+
+end
+
+
+
+game:GetService("RunService").RenderStepped:Connect(function()
+
+    if Script.Functions.getEquippedWeaponName(game.Players.LocalPlayer) ~= nil then
+
+        local WeaponSettings = GunSettings[Script.Functions.getEquippedWeaponName(game.Players.LocalPlayer)]
+
+        if WeaponSettings ~= nil then
+
+            Aiming.FOV = WeaponSettings.FOV
+
+        else
+
+            Aiming.FOV = 5
+
+        end
+
+    end    
+
+end)
+
+
+
+local __index
+
+__index = hookmetamethod(game, "__index", function(t, k)
+
+    if (t:IsA("Mouse") and (k == "Hit" or k == "Target") and Aiming.Check()) then
+
+        local SelectedPart = Aiming.SelectedPart
+
+        if (DaHoodSettings.SilentAim and (k == "Hit" or k == "Target")) then
+
+            local Hit = SelectedPart.CFrame + (SelectedPart.Velocity * DaHoodSettings.Prediction)
+
+            return (k == "Hit" and Hit or SelectedPart)
+
+        end
+
+    end
+
+
+
+    return __index(t, k)
+
+end)
+
+
+
+RunService:BindToRenderStep("AimLock", 0, function()
+
+    if (DaHoodSettings.AimLock and Aiming.Check() and UserInputService:IsKeyDown(DaHoodSettings.AimLockKeybind)) then
+
+        local SelectedPart = Aiming.SelectedPart
+
+        local Hit = SelectedPart.CFrame + (SelectedPart.Velocity * DaHoodSettings.Prediction)
+
+        CurrentCamera.CFrame = CFrame.lookAt(CurrentCamera.CFrame.Position, Hit.Position)
+
+    end
+ end)
+end})
+
+
+local aimbot = main:Tab("Misc")
+
+local button = section:Button({Name = "Lock detecter", Callback = function()
+   --- made by din#0001 --- 
+_G.enable = false
+_G.color = Color3.fromRGB(255,255,255)
+_G.toggle_keybind = "c"
+_G.swith_nigga = 'p'
+_G.method = "MousePos" --had a stroke sotkraakdakdakdkadkadkakdakdakdkdakdakdkadkadka
+
+if game.PlaceId == 2788229376 then
+    _G.method = "MousePos"
+end
+
+
+---------------------------------------------------------------
+local rs = game:GetService("RunService")
+local localPlayer = game.Players.LocalPlayer
+local mouse = localPlayer:GetMouse()
+local target;
+
+function getgun()
+    for i,v in pairs(target.Character:GetChildren()) do
+        if v and (v:FindFirstChild('Default') or v:FindFirstChild('Handle') )then
+            return v
+        end
+    end
+end
+
+function sendnotifi(message)
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = '';
+        Text = message;
+        Duration = "1";
+    })
+        
+    end
+
+
+function get_closet()
+    local a = math.huge
+    local b;
+
+    for i, v in pairs(game.Players:GetPlayers()) do
+        if v ~= localPlayer and v.Character and v.Character:FindFirstChild("Head") and  v.Character:FindFirstChild("HumanoidRootPart")  then
+            local c = game.Workspace.CurrentCamera:WorldToViewportPoint(v.Character.PrimaryPart.Position)
+            local d = (Vector2.new(mouse.X, mouse.Y) - Vector2.new(c.X, c.Y)).Magnitude
+
+            if a > d then
+                b = v
+                a = d
+            end
+        end
+    end
+
+    return b
+end
+
+--- 
+mouse.KeyDown:Connect(function(z)
+    if z == _G.toggle_keybind then
+        if _G.enable == false then
+            _G.enable = true
+            sendnotifi("enabled")
+        elseif _G.enable == true then
+            _G.enable = false 
+            sendnotifi("disabled")
+        end
+    end
+end)
+
+mouse.KeyDown:Connect(function(z)
+    if z == _G.swith_nigga then
+        target = get_closet()
+        sendnotifi("targeting: "..tostring(target.Name))
+    end
+end)
+---
+
+-- minified it 
+local a=Instance.new("Beam")a.Segments=1;a.Width0=0.2;a.Width1=0.2;a.Color=ColorSequence.new(_G.color)a.FaceCamera=true;local b=Instance.new("Attachment")local c=Instance.new("Attachment")a.Attachment0=b;a.Attachment1=c;a.Parent=workspace.Terrain;b.Parent=workspace.Terrain;c.Parent=workspace.Terrain
+
+task.spawn(function()
+    rs.RenderStepped:Connect(function()
+ 
+    local character = localPlayer.Character
+        if not character then
+        a.Enabled = false
+        return
+    end
+
+
+ 
+
+
+
+    if _G.enable  and getgun() and target.Character:FindFirstChild("BodyEffects") and target.Character:FindFirstChild("Head")  then
+        a.Enabled = true
+        b.Position =  target.Character:FindFirstChild("Head").Position
+        c.Position = target.Character.BodyEffects[_G.method].Value ---edit this if some random ass game got some weird ass other name :paling_face_
+    else
+        a.Enabled = false
+    end
+
+    end)
+    end)
+end})
+
+
+local button = section:Button({Name = "Rejoin", Callback = function()
+      local ts = game:GetService("TeleportService")
+
+local p = game:GetService("Players").LocalPlayer
+
+ 
+
+ts:Teleport(game.PlaceId, p)
+end})
+
+
+local button = section:Button({Name = "Shaders", Callback = function()
+   -- // Created by $ yk#1126
+
+local l = game:GetService("Lighting")
+
+local col = Instance.new("ColorCorrectionEffect", l)
+col.Brightness = 0
+col.Contrast = 0.01
+col.Saturation = 0.67
+end})
+
+
+local button = section:Button({Name = "Fat Script", Callback = function()
+   game.Players.LocalPlayer.Character.Humanoid.BodyDepthScale:Destroy()
+game.Players.LocalPlayer.Character.Humanoid.BodyWidthScale:Destroy()
+end})
+
+
+local button = section:Button({Name = "Run Anim", Callback = function()
+  game.Players.LocalPlayer.Character.Animate.run.RunAnim.AnimationId = "http://www.roblox.com/asset/?id=616163682"
+end})
+
+
+local button = section:Button({Name = "Fake Anim", Callback = function()
+   game.Players.LocalPlayer.Character.Animate.run.RunAnim.AnimationId = "http://www.roblox.com/asset/?id=616163682"
+game.Players.LocalPlayer.Character.Animate.fall.FallAnim.AnimationId = "http://www.roblox.com/asset/?id=707829716"
+game.Players.LocalPlayer.Character.Animate.jump.JumpAnim.AnimationId = "http://www.roblox.com/asset/?id=656117878"
+end})
+
+
+local button = section:Button({Name = "Fly", Callback = function()
+      local plr = game.Players.LocalPlayer
+local mouse = plr:GetMouse()
+local Humanoid = game.Players.LocalPlayer.Character.Humanoid or game.Players.LocalPlayer.Character.humanoid  
+
+		localplayer = plr
+		
+		if workspace:FindFirstChild("Core") then
+			workspace.Core:Destroy()
+		end
+		
+		local Core = Instance.new("Part")
+		Core.Name = "Core"
+		Core.Size = Vector3.new(0.05, 0.05, 0.05)
+
+		spawn(function()
+			Core.Parent = workspace
+			local Weld = Instance.new("Weld", Core)
+			Weld.Part0 = Core
+			Weld.Part1 = localplayer.Character.LowerTorso
+			Weld.C0 = CFrame.new(0, 0, 0)
+		end)
+		
+		workspace:WaitForChild("Core")
+		
+		local torso = workspace.Core
+		flying = true
+		local speed=10
+		local keys={a=false,d=false,w=false,s=false} 
+		local e1
+		local e2
+		local function start()
+			local pos = Instance.new("BodyPosition",torso)
+			local gyro = Instance.new("BodyGyro",torso)
+			pos.Name="EPIXPOS"
+			pos.maxForce = Vector3.new(math.huge, math.huge, math.huge)
+			pos.position = torso.Position
+			gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9) 
+			gyro.cframe = torso.CFrame
+			repeat
+				wait()
+				Humanoid.PlatformStand=true
+				local new=gyro.cframe - gyro.cframe.p + pos.position
+				if not keys.w and not keys.s and not keys.a and not keys.d then
+					speed=5
+				end
+				if keys.w then 
+					new = new + workspace.CurrentCamera.CoordinateFrame.lookVector * speed
+					speed=speed+0
+				end
+				if keys.s then 
+					new = new - workspace.CurrentCamera.CoordinateFrame.lookVector * speed
+					speed=speed+0
+				end
+				if keys.d then 
+					new = new * CFrame.new(speed,0,0)
+					speed=speed+0
+				end
+				if keys.a then 
+					new = new * CFrame.new(-speed,0,0)
+					speed=speed+0
+				end
+				if speed>10 then
+					speed=5
+				end
+				pos.position=new.p
+				if keys.w then
+					gyro.cframe = workspace.CurrentCamera.CoordinateFrame*CFrame.Angles(-math.rad(speed*0),0,0)
+				elseif keys.s then
+					gyro.cframe = workspace.CurrentCamera.CoordinateFrame*CFrame.Angles(math.rad(speed*0),0,0)
+				else
+					gyro.cframe = workspace.CurrentCamera.CoordinateFrame
+				end
+			until flying == false
+			if gyro then gyro:Destroy() end
+			if pos then pos:Destroy() end
+			flying=false
+			Humanoid.PlatformStand=false
+			speed=10
+		end
+		e1=mouse.KeyDown:connect(function(key)
+			if not torso or not torso.Parent then flying=false e1:disconnect() e2:disconnect() return end
+			if key=="w" then
+				keys.w=true
+			elseif key=="s" then
+				keys.s=true
+			elseif key=="a" then
+				keys.a=true
+			elseif key=="d" then
+				keys.d=true
+			elseif key=="x" then
+				if flying==true then
+					flying=false
+				else
+					flying=true
+					start()
+				end
+			end
+		end)
+		e2=mouse.KeyUp:connect(function(key)
+			if key=="w" then
+				keys.w=false
+			elseif key=="s" then
+				keys.s=false
+			elseif key=="a" then
+				keys.a=false
+			elseif key=="d" then
+				keys.d=false
+			end
+		end)
+		start()
+end})
+
+
+
+local button = section:Button({Name = "Titan (Nagas!)", Callback = function()
+  game.Players.LocalPlayer.Chatted:Connect(function(msg)
+    if msg == "Nagas!" then
+local Humanoid = game.Players.LocalPlayer.Character.Humanoid;
+game.Players.LocalPlayer.Character.Head.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.Head.FaceCenterAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.FaceFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.HairAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.HatAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.NeckRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.LeftWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.LeftGripAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightHand.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightHand.RightWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightHand.RightGripAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.RightHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.RightKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.LeftHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.LeftKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.RootRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.LeftHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.RightHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistCenterAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistBackAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.WaistRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.NeckRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.LeftShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.RightShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.BodyFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.BodyBackAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.LeftCollarAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.RightCollarAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.NeckAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightFoot.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightFoot.RightAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftFoot.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftFoot.LeftAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.LeftAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.LeftKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.RightKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.RightAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftShoulderAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightShoulderAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.RightElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.RightWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.LeftElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.LeftWristRigAttachment.OriginalPosition:Destroy()
+wait(0.5)
+Humanoid:FindFirstChild("BodyTypeScale"):Destroy()
+wait(1)
+ 
+game.Players.LocalPlayer.Character.Head.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.Head.FaceCenterAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.FaceFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.HairAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.HatAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.NeckRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.LeftWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.LeftGripAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightHand.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightHand.RightWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightHand.RightGripAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.RightHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.RightKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.LeftHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.LeftKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.RootRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.LeftHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.RightHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistCenterAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistBackAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.WaistRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.NeckRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.LeftShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.RightShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.BodyFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.BodyBackAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.LeftCollarAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.RightCollarAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.NeckAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightFoot.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightFoot.RightAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftFoot.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftFoot.LeftAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.LeftAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.LeftKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.RightKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.RightAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftShoulderAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightShoulderAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.RightElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.RightWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.LeftElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.LeftWristRigAttachment.OriginalPosition:Destroy()
+wait(0.5)
+Humanoid:FindFirstChild("BodyWidthScale"):Destroy()
+wait(1)
+ 
+game.Players.LocalPlayer.Character.Head.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.Head.FaceCenterAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.FaceFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.HairAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.HatAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.NeckRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.LeftWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.LeftGripAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightHand.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightHand.RightWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightHand.RightGripAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.RightHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.RightKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.LeftHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.LeftKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.RootRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.LeftHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.RightHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistCenterAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistBackAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.WaistRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.NeckRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.LeftShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.RightShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.BodyFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.BodyBackAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.LeftCollarAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.RightCollarAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.NeckAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightFoot.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightFoot.RightAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftFoot.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftFoot.LeftAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.LeftAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.LeftKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.RightKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.RightAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftShoulderAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightShoulderAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.RightElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.RightWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.LeftElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.LeftWristRigAttachment.OriginalPosition:Destroy()
+wait(0.5)
+Humanoid:FindFirstChild("BodyDepthScale"):Destroy()
+wait(1)
+ 
+game.Players.LocalPlayer.Character.Head.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.Head.FaceCenterAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.FaceFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.HairAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.HatAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.Head.NeckRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.LeftWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftHand.LeftGripAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightHand.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightHand.RightWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightHand.RightGripAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.RightHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.RightKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.LeftHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.LeftKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.RootRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.LeftHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.RightHipRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistCenterAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.WaistBackAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LowerTorso.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.WaistRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.NeckRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.LeftShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.RightShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.BodyFrontAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.BodyBackAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.LeftCollarAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.RightCollarAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.NeckAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.UpperTorso.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightFoot.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightFoot.RightAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftFoot.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftFoot.LeftAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.LeftAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerLeg.LeftKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.RightKneeRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerLeg.RightAnkleRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftShoulderAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftUpperArm.LeftShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightShoulderAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightUpperArm.RightShoulderRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.RightElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.RightLowerArm.RightWristRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.OriginalSize:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.LeftElbowRigAttachment.OriginalPosition:Destroy()
+game.Players.LocalPlayer.Character.LeftLowerArm.LeftWristRigAttachment.OriginalPosition:Destroy()
+wait(0.5)
+Humanoid:FindFirstChild("HeadScale"):Destroy()
+wait(1)
+    end
+end)
+end})
+
+
+
+
+local button = section:Button({Name = "Launch V1", Callback = function()
+   loadstring(game:HttpGet('https://raw.githubusercontent.com/y10ko/Negro/main/Niggaware'))()
+end})
+
+
+
